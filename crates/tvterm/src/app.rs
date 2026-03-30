@@ -216,15 +216,28 @@ impl ApplicationHandler<UserEvent> for App {
                     return;
                 }
 
-                // Ctrl+Shift+O toggles the overlay.
+                // Ctrl+Shift shortcuts.
                 if state.modifiers.contains(ModifiersState::CONTROL)
                     && state.modifiers.contains(ModifiersState::SHIFT)
                 {
                     if let Key::Character(c) = &event.logical_key {
-                        if c.eq_ignore_ascii_case("o") {
-                            state.overlay_visible = !state.overlay_visible;
-                            state.window.request_redraw();
-                            return;
+                        match c.as_str() {
+                            "O" | "o" => {
+                                state.overlay_visible = !state.overlay_visible;
+                                state.window.request_redraw();
+                                return;
+                            }
+                            "+" | "=" => {
+                                state.opacity = (state.opacity + 0.05).min(1.0);
+                                state.window.request_redraw();
+                                return;
+                            }
+                            "-" | "_" => {
+                                state.opacity = (state.opacity - 0.05).max(0.0);
+                                state.window.request_redraw();
+                                return;
+                            }
+                            _ => {}
                         }
                     }
                 }
