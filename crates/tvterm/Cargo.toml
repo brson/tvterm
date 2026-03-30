@@ -1,0 +1,17 @@
+[package]
+name = "tvterm"
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]
+rmx.workspace = true
+winit.workspace = true
+wgpu.workspace = true
+pollster.workspace = true
+alacritty_terminal.workspace = true
+portable-pty.workspace = true
+egui.workspace = true
+egui-winit.workspace = true
+egui-wgpu.workspace = true

@@ -1,0 +1,37 @@
+[workspace.package]
+description = "todo"
+version = "0.1.0"
+license = "Apache-2.0 OR MIT"
+authors = ["Brian Anderson <andersrb@gmail.com>"]
+documentation = "todo"
+edition = "2024"
+
+[workspace]
+resolver = "2"
+
+members = [
+  "crates/*",
+]
+
+default-members = [
+  "crates/tvterm-cli",
+]
+
+[workspace.dependencies]
+rmx.package = "rustmax"
+rmx.version = "0.0.9"
+rmx.features = [
+  "rmx-profile-portable",
+]
+
+winit = "0.30"
+wgpu = "29"
+alacritty_terminal = "0.25"
+portable-pty = "0.9"
+egui = "0.34"
+egui-winit = "0.34"
+egui-wgpu = "0.34"
+pollster = "0.4"
+
+[profile.release]
+overflow-checks = true
