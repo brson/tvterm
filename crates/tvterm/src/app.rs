@@ -26,13 +26,17 @@ pub struct App {
 }
 
 /// State that exists only after the window is created (after `resumed`).
+///
+/// Field order defines drop order: egui state and renderer (which owns the
+/// wgpu surface) must drop before the window to avoid a use-after-free in
+/// the Wayland/Vulkan backend teardown.
 struct RunningState {
-    window: Arc<Window>,
+    egui_state: egui_winit::State,
+    egui_ctx: egui::Context,
     renderer: Renderer,
     terminal: Terminal,
     pty: Pty,
-    egui_ctx: egui::Context,
-    egui_state: egui_winit::State,
+    window: Arc<Window>,
     opacity: f32,
     overlay_visible: bool,
     cell_metrics: Option<CellMetrics>,

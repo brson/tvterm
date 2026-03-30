@@ -4,12 +4,15 @@ use wgpu::CompositeAlphaMode;
 use winit::window::Window;
 
 /// Owns the wgpu device, queue, surface, and egui renderer.
+///
+/// Field order defines drop order: egui renderer and surface drop before
+/// device/queue, since they hold resources allocated from the device.
 pub struct Renderer {
-    pub device: wgpu::Device,
-    pub queue: wgpu::Queue,
     pub egui_renderer: egui_wgpu::Renderer,
     surface: wgpu::Surface<'static>,
     config: wgpu::SurfaceConfiguration,
+    pub queue: wgpu::Queue,
+    pub device: wgpu::Device,
 }
 
 impl Renderer {
