@@ -4829,14 +4829,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tvterm-cli"
-version = "0.1.0"
-dependencies = [
- "rustmax",
- "tvterm",
-]
-
-[[package]]
 name = "type-map"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

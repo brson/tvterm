@@ -14,7 +14,7 @@ members = [
 ]
 
 default-members = [
-  "crates/tvterm-cli",
+  "crates/tvterm",
 ]
 
 [workspace.dependencies]
