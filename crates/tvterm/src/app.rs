@@ -234,6 +234,16 @@ impl ApplicationHandler<UserEvent> for App {
                     return;
                 }
 
+                // Intercept egui zoom keys (Ctrl+=/+/-/0) which egui handles
+                // but doesn't always report as consumed.
+                if state.modifiers.contains(ModifiersState::CONTROL) {
+                    if let Key::Character(c) = &event.logical_key {
+                        if matches!(c.as_str(), "=" | "+" | "-" | "0") {
+                            return;
+                        }
+                    }
+                }
+
                 if let Some(bytes) = translate_key(&event.logical_key, state.modifiers) {
                     if let Err(e) = state.pty.write(&bytes) {
                         error!("PTY write error: {e}");
