@@ -354,6 +354,13 @@ fn named_key_sequence(key: NamedKey, ctrl: bool, shift: bool, alt: bool) -> Opti
     let simple = |s: &str| Some(s.as_bytes().to_vec());
 
     match key {
+        NamedKey::Space => {
+            if ctrl {
+                simple("\x00")
+            } else {
+                Some(maybe_alt(alt, b" "))
+            }
+        }
         NamedKey::Enter => simple("\r"),
         NamedKey::Backspace => {
             if ctrl {
