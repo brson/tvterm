@@ -13,6 +13,7 @@ use crate::pty::Pty;
 use crate::renderer::Renderer;
 use crate::terminal::Terminal;
 use crate::text::{self, CellMetrics};
+use crate::theme::Theme;
 use crate::UserEvent;
 
 const INITIAL_COLS: u16 = 80;
@@ -41,6 +42,7 @@ struct RunningState {
     overlay_visible: bool,
     cell_metrics: Option<CellMetrics>,
     font_size: f32,
+    theme: Theme,
     modifiers: ModifiersState,
 }
 
@@ -125,6 +127,7 @@ impl ApplicationHandler<UserEvent> for App {
             overlay_visible: false,
             cell_metrics: None,
             font_size: self.config.font_size,
+            theme: Theme::CatppuccinMocha,
             modifiers: ModifiersState::empty(),
         });
     }
@@ -294,16 +297,18 @@ impl RunningState {
             }
 
             // Render terminal content.
+            let palette = self.theme.palette();
             text::render_terminal(
                 ctx,
                 &self.terminal.term,
                 font_size,
                 cell_metrics,
                 opacity,
+                palette,
             );
 
             // Render overlay.
-            overlay::render_overlay(ctx, &mut self.opacity, self.overlay_visible);
+            overlay::render_overlay(ctx, &mut self.opacity, &mut self.theme, self.overlay_visible);
         });
 
         self.egui_state
@@ -313,11 +318,13 @@ impl RunningState {
             .egui_ctx
             .tessellate(full_output.shapes, full_output.pixels_per_point);
 
+        let bg = self.theme.palette().background;
         if let Err(e) = self.renderer.render(
             &full_output.textures_delta,
             &clipped_primitives,
             full_output.pixels_per_point,
             self.opacity,
+            [bg.r, bg.g, bg.b],
         ) {
             error!("Render error: {e}");
         }

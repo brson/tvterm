@@ -133,6 +133,7 @@ impl Renderer {
         clipped_primitives: &[egui::ClippedPrimitive],
         pixels_per_point: f32,
         opacity: f32,
+        bg_rgb: [u8; 3],
     ) -> AnyResult<()> {
         let output = self.surface.get_current_texture();
         let frame = match output {
@@ -172,6 +173,9 @@ impl Renderer {
 
         // Premultiplied alpha: multiply RGB by alpha.
         let a = opacity as f64;
+        let r = bg_rgb[0] as f64 / 255.0;
+        let g = bg_rgb[1] as f64 / 255.0;
+        let b = bg_rgb[2] as f64 / 255.0;
         {
             let mut pass = encoder
                 .begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -182,9 +186,9 @@ impl Renderer {
                         depth_slice: None,
                         ops: wgpu::Operations {
                             load: wgpu::LoadOp::Clear(wgpu::Color {
-                                r: 0.0 * a,
-                                g: 0.0 * a,
-                                b: 0.0 * a,
+                                r: r * a,
+                                g: g * a,
+                                b: b * a,
                                 a,
                             }),
                             store: wgpu::StoreOp::Store,

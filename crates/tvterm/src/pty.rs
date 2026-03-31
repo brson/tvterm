@@ -29,7 +29,12 @@ impl Pty {
             pixel_height: 0,
         })?;
 
-        let cmd = CommandBuilder::new_default_prog();
+        let mut cmd = CommandBuilder::new_default_prog();
+
+        // Signal color support to the shell and child programs.
+        cmd.env("TERM", "xterm-256color");
+        cmd.env("COLORTERM", "truecolor");
+
         let _child = pair.slave.spawn_command(cmd)?;
         // Drop slave — we only need the master side.
         drop(pair.slave);

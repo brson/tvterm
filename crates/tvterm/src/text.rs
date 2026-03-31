@@ -10,6 +10,7 @@ use egui::{
 };
 
 use crate::terminal::TermEventProxy;
+use crate::theme::Palette;
 
 /// Cell dimensions in pixels.
 #[derive(Debug, Clone, Copy)]
@@ -21,15 +22,12 @@ pub struct CellMetrics {
 /// Compute monospace cell dimensions from the egui context.
 pub fn compute_cell_metrics(ctx: &egui::Context, font_size: f32) -> CellMetrics {
     let font_id = FontId::monospace(font_size);
-    // Layout a reference character to measure cell dimensions.
     let galley = ctx.fonts_mut(|f| {
         f.layout_no_wrap("M".to_string(), font_id.clone(), Color32::WHITE)
     });
-    let cell_width = galley.rect.width();
-    let cell_height = galley.rect.height();
     CellMetrics {
-        width: cell_width,
-        height: cell_height,
+        width: galley.rect.width(),
+        height: galley.rect.height(),
     }
 }
 
@@ -40,6 +38,7 @@ pub fn render_terminal(
     font_size: f32,
     cell_metrics: CellMetrics,
     opacity: f32,
+    palette: Palette,
 ) {
     let rows = term.screen_lines();
     let content = term.renderable_content();
@@ -51,15 +50,14 @@ pub fn render_terminal(
     let font_id = FontId::monospace(font_size);
 
     let default_bg = TermColor::Named(NamedColor::Background);
+    let fg_default = palette.foreground;
 
-    // Use a CentralPanel with a transparent frame to fill the whole window.
     #[expect(deprecated)]
     egui::CentralPanel::default()
         .frame(egui::Frame::NONE)
         .show(ctx, |ui| {
             let painter = ui.painter();
 
-            // Collect cells per line.
             let mut lines: Vec<Vec<CellInfo>> = (0..rows).map(|_| Vec::new()).collect();
 
             for indexed in content.display_iter {
@@ -78,7 +76,7 @@ pub fn render_terminal(
 
                 // Draw cell background if non-default.
                 if bg_color != default_bg {
-                    let rgb = resolve_term_rgb(bg_color, colors);
+                    let rgb = resolve_term_rgb(bg_color, colors, palette);
                     let a = (opacity * 255.0) as u8;
                     let bg32 = Color32::from_rgba_unmultiplied(rgb.r, rgb.g, rgb.b, a);
                     let rect = Rect::from_min_size(
@@ -89,7 +87,7 @@ pub fn render_terminal(
                 }
 
                 let c = if cell.c == '\0' { ' ' } else { cell.c };
-                let fg_rgb = resolve_term_rgb(fg_color, colors);
+                let fg_rgb = resolve_term_rgb(fg_color, colors, palette);
                 let fg32 = Color32::from_rgb(fg_rgb.r, fg_rgb.g, fg_rgb.b);
 
                 lines[line_idx].push(CellInfo { c, fg: fg32 });
@@ -101,7 +99,8 @@ pub fn render_terminal(
             if cursor_line < rows && cursor.shape != CursorShape::Hidden {
                 let cx = cursor_col as f32 * cell_w;
                 let cy = cursor_line as f32 * cell_h;
-                let cursor_color = Color32::from_rgba_unmultiplied(200, 200, 200, 200);
+                let cr = palette.cursor;
+                let cursor_color = Color32::from_rgba_unmultiplied(cr.r, cr.g, cr.b, 200);
 
                 match cursor.shape {
                     CursorShape::Block => {
@@ -140,7 +139,7 @@ pub fn render_terminal(
                 }
             }
 
-            // Render text row by row using LayoutJob for per-character colors.
+            // Render text row by row.
             for (line_idx, cells) in lines.iter().enumerate() {
                 if cells.is_empty() {
                     continue;
@@ -168,10 +167,11 @@ pub fn render_terminal(
                 }
 
                 let galley = painter.layout_job(job);
+                let fg32 = Color32::from_rgb(fg_default.r, fg_default.g, fg_default.b);
                 painter.galley(
                     Pos2::new(0.0, line_idx as f32 * cell_h),
                     galley,
-                    Color32::WHITE,
+                    fg32,
                 );
             }
         });
@@ -182,51 +182,54 @@ struct CellInfo {
     fg: Color32,
 }
 
-/// Resolve a terminal color to an RGB triplet.
+/// Resolve a terminal color to an RGB triplet using the theme palette.
 fn resolve_term_rgb(
     color: TermColor,
     colors: &alacritty_terminal::term::color::Colors,
+    palette: Palette,
 ) -> TermRgb {
     match color {
         TermColor::Spec(rgb) => rgb,
         TermColor::Named(name) => {
+            // Use the palette for named colors, but allow alacritty_terminal's
+            // color overrides (from OSC sequences) to take priority.
             let idx = name as usize;
-            colors[idx].unwrap_or_else(|| default_named_color(name))
+            colors[idx].unwrap_or_else(|| palette.resolve_named(name))
         }
-        TermColor::Indexed(idx) => colors[idx as usize].unwrap_or_else(|| indexed_color(idx)),
-    }
-}
-
-/// Default color for named terminal colors.
-fn default_named_color(name: NamedColor) -> TermRgb {
-    match name {
-        NamedColor::Black => TermRgb { r: 0, g: 0, b: 0 },
-        NamedColor::Red => TermRgb { r: 205, g: 49, b: 49 },
-        NamedColor::Green => TermRgb { r: 13, g: 188, b: 121 },
-        NamedColor::Yellow => TermRgb { r: 229, g: 229, b: 16 },
-        NamedColor::Blue => TermRgb { r: 36, g: 114, b: 200 },
-        NamedColor::Magenta => TermRgb { r: 188, g: 63, b: 188 },
-        NamedColor::Cyan => TermRgb { r: 17, g: 168, b: 205 },
-        NamedColor::White => TermRgb { r: 229, g: 229, b: 229 },
-        NamedColor::BrightBlack => TermRgb { r: 102, g: 102, b: 102 },
-        NamedColor::BrightRed => TermRgb { r: 241, g: 76, b: 76 },
-        NamedColor::BrightGreen => TermRgb { r: 35, g: 209, b: 139 },
-        NamedColor::BrightYellow => TermRgb { r: 245, g: 245, b: 67 },
-        NamedColor::BrightBlue => TermRgb { r: 59, g: 142, b: 234 },
-        NamedColor::BrightMagenta => TermRgb { r: 214, g: 112, b: 214 },
-        NamedColor::BrightCyan => TermRgb { r: 41, g: 184, b: 219 },
-        NamedColor::BrightWhite => TermRgb { r: 255, g: 255, b: 255 },
-        NamedColor::Foreground => TermRgb { r: 229, g: 229, b: 229 },
-        NamedColor::Background => TermRgb { r: 0, g: 0, b: 0 },
-        _ => TermRgb { r: 229, g: 229, b: 229 },
+        TermColor::Indexed(idx) => {
+            colors[idx as usize].unwrap_or_else(|| {
+                if idx < 16 {
+                    // Map indexed 0-15 to named colors through the palette.
+                    let name = match idx {
+                        0 => NamedColor::Black,
+                        1 => NamedColor::Red,
+                        2 => NamedColor::Green,
+                        3 => NamedColor::Yellow,
+                        4 => NamedColor::Blue,
+                        5 => NamedColor::Magenta,
+                        6 => NamedColor::Cyan,
+                        7 => NamedColor::White,
+                        8 => NamedColor::BrightBlack,
+                        9 => NamedColor::BrightRed,
+                        10 => NamedColor::BrightGreen,
+                        11 => NamedColor::BrightYellow,
+                        12 => NamedColor::BrightBlue,
+                        13 => NamedColor::BrightMagenta,
+                        14 => NamedColor::BrightCyan,
+                        15 => NamedColor::BrightWhite,
+                        _ => unreachable!(),
+                    };
+                    palette.resolve_named(name)
+                } else {
+                    indexed_color(idx)
+                }
+            })
+        }
     }
 }
 
 /// Standard 256-color palette lookup for indexed colors 16-255.
 fn indexed_color(idx: u8) -> TermRgb {
-    if idx < 16 {
-        return TermRgb { r: 229, g: 229, b: 229 };
-    }
     if idx < 232 {
         let idx = idx - 16;
         let r = (idx / 36) % 6;
