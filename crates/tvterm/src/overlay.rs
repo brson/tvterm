@@ -1,7 +1,13 @@
 use crate::theme::Theme;
 
 /// Render the settings overlay using egui.
-pub fn render_overlay(ctx: &egui::Context, opacity: &mut f32, theme: &mut Theme, visible: bool) {
+pub fn render_overlay(
+    ctx: &egui::Context,
+    opacity: &mut f32,
+    bg_dim: &mut f32,
+    theme: &mut Theme,
+    visible: bool,
+) {
     if !visible {
         return;
     }
@@ -16,6 +22,11 @@ pub fn render_overlay(ctx: &egui::Context, opacity: &mut f32, theme: &mut Theme,
                 ui.add(egui::Slider::new(opacity, 0.0..=1.0).show_value(true));
             });
 
+            ui.horizontal(|ui| {
+                ui.label("Background");
+                ui.add(egui::Slider::new(bg_dim, 0.0..=1.0).show_value(true));
+            });
+
             ui.separator();
 
             ui.label("Theme");
@@ -28,7 +39,6 @@ pub fn render_overlay(ctx: &egui::Context, opacity: &mut f32, theme: &mut Theme,
                         *theme = t;
                     }
 
-                    // Show color swatches.
                     let swatch_size = egui::vec2(12.0, 12.0);
                     let colors = [
                         p.red, p.green, p.yellow, p.blue, p.magenta, p.cyan,

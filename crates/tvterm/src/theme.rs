@@ -7,6 +7,10 @@ pub enum Theme {
     Kanagawa,
     TokyoNight,
     CatppuccinMocha,
+    SolarizedDark,
+    OneDark,
+    GruvboxDark,
+    AyuDark,
 }
 
 impl Theme {
@@ -15,6 +19,10 @@ impl Theme {
         Theme::Kanagawa,
         Theme::TokyoNight,
         Theme::CatppuccinMocha,
+        Theme::SolarizedDark,
+        Theme::OneDark,
+        Theme::GruvboxDark,
+        Theme::AyuDark,
     ];
 
     pub fn name(self) -> &'static str {
@@ -23,6 +31,10 @@ impl Theme {
             Theme::Kanagawa => "Kanagawa",
             Theme::TokyoNight => "Tokyo Night",
             Theme::CatppuccinMocha => "Catppuccin Mocha",
+            Theme::SolarizedDark => "Solarized Dark",
+            Theme::OneDark => "One Dark",
+            Theme::GruvboxDark => "Gruvbox Dark",
+            Theme::AyuDark => "Ayu Dark",
         }
     }
 
@@ -32,6 +44,10 @@ impl Theme {
             Theme::Kanagawa => KANAGAWA,
             Theme::TokyoNight => TOKYO_NIGHT,
             Theme::CatppuccinMocha => CATPPUCCIN_MOCHA,
+            Theme::SolarizedDark => SOLARIZED_DARK,
+            Theme::OneDark => ONE_DARK,
+            Theme::GruvboxDark => GRUVBOX_DARK,
+            Theme::AyuDark => AYU_DARK,
         }
     }
 }
@@ -85,6 +101,15 @@ impl Palette {
             _ => self.foreground,
         }
     }
+
+    /// Return the background color dimmed by a factor (0.0 = black, 1.0 = original).
+    pub fn dimmed_background(self, dim: f32) -> [u8; 3] {
+        [
+            (self.background.r as f32 * dim) as u8,
+            (self.background.g as f32 * dim) as u8,
+            (self.background.b as f32 * dim) as u8,
+        ]
+    }
 }
 
 const fn rgb(r: u8, g: u8, b: u8) -> Rgb {
@@ -92,10 +117,9 @@ const fn rgb(r: u8, g: u8, b: u8) -> Rgb {
 }
 
 // https://draculatheme.com/contribute
-// Background reduced to 1/4 brightness for translucency.
 const DRACULA: Palette = Palette {
     foreground: rgb(248, 248, 242),
-    background: rgb(10, 10, 13),
+    background: rgb(40, 42, 54),
     cursor: rgb(248, 248, 242),
     black: rgb(33, 34, 44),
     red: rgb(255, 85, 85),
@@ -116,10 +140,9 @@ const DRACULA: Palette = Palette {
 };
 
 // https://github.com/rebelot/kanagawa.nvim
-// Background reduced to 1/4 brightness for translucency.
 const KANAGAWA: Palette = Palette {
     foreground: rgb(220, 215, 186),
-    background: rgb(7, 7, 10),
+    background: rgb(31, 31, 40),
     cursor: rgb(200, 192, 147),
     black: rgb(22, 22, 29),
     red: rgb(195, 64, 67),
@@ -140,10 +163,9 @@ const KANAGAWA: Palette = Palette {
 };
 
 // https://github.com/enkia/tokyo-night-vscode-theme
-// Background reduced to 1/4 brightness for translucency.
 const TOKYO_NIGHT: Palette = Palette {
     foreground: rgb(192, 202, 245),
-    background: rgb(6, 6, 9),
+    background: rgb(26, 27, 38),
     cursor: rgb(192, 202, 245),
     black: rgb(21, 22, 30),
     red: rgb(247, 118, 142),
@@ -164,10 +186,9 @@ const TOKYO_NIGHT: Palette = Palette {
 };
 
 // https://github.com/catppuccin/catppuccin
-// Background reduced to 1/4 brightness for translucency.
 const CATPPUCCIN_MOCHA: Palette = Palette {
     foreground: rgb(205, 214, 244),
-    background: rgb(7, 7, 11),
+    background: rgb(30, 30, 46),
     cursor: rgb(245, 224, 220),
     black: rgb(69, 71, 90),
     red: rgb(243, 139, 168),
@@ -185,4 +206,96 @@ const CATPPUCCIN_MOCHA: Palette = Palette {
     bright_magenta: rgb(245, 194, 231),
     bright_cyan: rgb(148, 226, 213),
     bright_white: rgb(205, 214, 244),
+};
+
+// https://ethanschoonover.com/solarized/
+const SOLARIZED_DARK: Palette = Palette {
+    foreground: rgb(131, 148, 150),
+    background: rgb(0, 43, 54),
+    cursor: rgb(131, 148, 150),
+    black: rgb(7, 54, 66),
+    red: rgb(220, 50, 47),
+    green: rgb(133, 153, 0),
+    yellow: rgb(181, 137, 0),
+    blue: rgb(38, 139, 210),
+    magenta: rgb(211, 54, 130),
+    cyan: rgb(42, 161, 152),
+    white: rgb(238, 232, 213),
+    bright_black: rgb(0, 43, 54),
+    bright_red: rgb(203, 75, 22),
+    bright_green: rgb(88, 110, 117),
+    bright_yellow: rgb(101, 123, 131),
+    bright_blue: rgb(131, 148, 150),
+    bright_magenta: rgb(108, 113, 196),
+    bright_cyan: rgb(147, 161, 161),
+    bright_white: rgb(253, 246, 227),
+};
+
+// https://github.com/Binaryify/OneDark-Pro
+const ONE_DARK: Palette = Palette {
+    foreground: rgb(171, 178, 191),
+    background: rgb(40, 44, 52),
+    cursor: rgb(171, 178, 191),
+    black: rgb(40, 44, 52),
+    red: rgb(224, 108, 117),
+    green: rgb(152, 195, 121),
+    yellow: rgb(229, 192, 123),
+    blue: rgb(97, 175, 239),
+    magenta: rgb(198, 120, 221),
+    cyan: rgb(86, 182, 194),
+    white: rgb(171, 178, 191),
+    bright_black: rgb(92, 99, 112),
+    bright_red: rgb(224, 108, 117),
+    bright_green: rgb(152, 195, 121),
+    bright_yellow: rgb(229, 192, 123),
+    bright_blue: rgb(97, 175, 239),
+    bright_magenta: rgb(198, 120, 221),
+    bright_cyan: rgb(86, 182, 194),
+    bright_white: rgb(255, 255, 255),
+};
+
+// https://github.com/morhetz/gruvbox
+const GRUVBOX_DARK: Palette = Palette {
+    foreground: rgb(235, 219, 178),
+    background: rgb(40, 40, 40),
+    cursor: rgb(235, 219, 178),
+    black: rgb(40, 40, 40),
+    red: rgb(204, 36, 29),
+    green: rgb(152, 151, 26),
+    yellow: rgb(215, 153, 33),
+    blue: rgb(69, 133, 136),
+    magenta: rgb(177, 98, 134),
+    cyan: rgb(104, 157, 106),
+    white: rgb(168, 153, 132),
+    bright_black: rgb(146, 131, 116),
+    bright_red: rgb(251, 73, 52),
+    bright_green: rgb(184, 187, 38),
+    bright_yellow: rgb(250, 189, 47),
+    bright_blue: rgb(131, 165, 152),
+    bright_magenta: rgb(211, 134, 155),
+    bright_cyan: rgb(142, 192, 124),
+    bright_white: rgb(235, 219, 178),
+};
+
+// https://github.com/ayu-theme/ayu-colors
+const AYU_DARK: Palette = Palette {
+    foreground: rgb(179, 177, 173),
+    background: rgb(11, 14, 20),
+    cursor: rgb(232, 183, 82),
+    black: rgb(1, 10, 16),
+    red: rgb(234, 109, 96),
+    green: rgb(145, 180, 99),
+    yellow: rgb(232, 183, 82),
+    blue: rgb(83, 149, 222),
+    magenta: rgb(215, 129, 220),
+    cyan: rgb(149, 230, 203),
+    white: rgb(192, 191, 188),
+    bright_black: rgb(104, 111, 120),
+    bright_red: rgb(242, 151, 132),
+    bright_green: rgb(172, 202, 136),
+    bright_yellow: rgb(255, 215, 131),
+    bright_blue: rgb(124, 178, 238),
+    bright_magenta: rgb(230, 176, 233),
+    bright_cyan: rgb(179, 242, 224),
+    bright_white: rgb(255, 255, 255),
 };

@@ -39,6 +39,7 @@ struct RunningState {
     pty: Pty,
     window: Arc<Window>,
     opacity: f32,
+    bg_dim: f32,
     overlay_visible: bool,
     cell_metrics: Option<CellMetrics>,
     font_size: f32,
@@ -124,6 +125,7 @@ impl ApplicationHandler<UserEvent> for App {
             egui_ctx,
             egui_state,
             opacity: self.config.initial_opacity,
+            bg_dim: 0.25,
             overlay_visible: false,
             cell_metrics: None,
             font_size: self.config.font_size,
@@ -308,7 +310,13 @@ impl RunningState {
             );
 
             // Render overlay.
-            overlay::render_overlay(ctx, &mut self.opacity, &mut self.theme, self.overlay_visible);
+            overlay::render_overlay(
+                ctx,
+                &mut self.opacity,
+                &mut self.bg_dim,
+                &mut self.theme,
+                self.overlay_visible,
+            );
         });
 
         self.egui_state
@@ -318,13 +326,13 @@ impl RunningState {
             .egui_ctx
             .tessellate(full_output.shapes, full_output.pixels_per_point);
 
-        let bg = self.theme.palette().background;
+        let bg = self.theme.palette().dimmed_background(self.bg_dim);
         if let Err(e) = self.renderer.render(
             &full_output.textures_delta,
             &clipped_primitives,
             full_output.pixels_per_point,
             self.opacity,
-            [bg.r, bg.g, bg.b],
+            bg,
         ) {
             error!("Render error: {e}");
         }
