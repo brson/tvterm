@@ -213,16 +213,6 @@ impl ApplicationHandler<UserEvent> for App {
             }
             WindowEvent::Resized(size) => {
                 state.renderer.resize(size.width, size.height);
-                if let Some(cell) = state.cell_metrics {
-                    let cols = (size.width as f32 / cell.width).floor() as usize;
-                    let rows = (size.height as f32 / cell.height).floor() as usize;
-                    if cols > 0 && rows > 0 {
-                        state.terminal.resize(cols, rows);
-                        if let Err(e) = state.pty.resize(cols as u16, rows as u16) {
-                            error!("PTY resize error: {e}");
-                        }
-                    }
-                }
                 state.window.request_redraw();
             }
             WindowEvent::RedrawRequested => {
@@ -283,13 +273,25 @@ impl RunningState {
 
         #[expect(deprecated)]
         let full_output = self.egui_ctx.run(raw_input, |ctx| {
-            // Compute cell metrics on first frame (fonts not available until run()).
-            if self.cell_metrics.is_none() {
-                let metrics = text::compute_cell_metrics(ctx, font_size);
-                info!("Cell metrics: {:.1}x{:.1}", metrics.width, metrics.height);
-                self.cell_metrics = Some(metrics);
+            // Recompute cell metrics every frame (zoom may have changed).
+            let cell_metrics = text::compute_cell_metrics(ctx, font_size);
+            self.cell_metrics = Some(cell_metrics);
+
+            // Resize terminal grid if dimensions changed.
+            let screen = ctx.screen_rect();
+            let cols = (screen.width() / cell_metrics.width).floor() as usize;
+            let rows = (screen.height() / cell_metrics.height).floor() as usize;
+            if cols > 0 && rows > 0 {
+                use alacritty_terminal::grid::Dimensions;
+                let cur_cols = self.terminal.term.columns();
+                let cur_rows = self.terminal.term.screen_lines();
+                if cols != cur_cols || rows != cur_rows {
+                    self.terminal.resize(cols, rows);
+                    if let Err(e) = self.pty.resize(cols as u16, rows as u16) {
+                        error!("PTY resize error: {e}");
+                    }
+                }
             }
-            let cell_metrics = self.cell_metrics.unwrap();
 
             // Render terminal content.
             text::render_terminal(
