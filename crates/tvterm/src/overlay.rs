@@ -17,14 +17,14 @@ pub fn render_overlay(
         .resizable(false)
         .anchor(egui::Align2::RIGHT_TOP, egui::vec2(-16.0, 16.0))
         .show(ctx, |ui| {
-            ui.horizontal(|ui| {
+            egui::Grid::new("sliders").num_columns(2).show(ui, |ui| {
                 ui.label("Opacity");
                 ui.add(egui::Slider::new(opacity, 0.0..=1.0).show_value(true));
-            });
+                ui.end_row();
 
-            ui.horizontal(|ui| {
                 ui.label("Background");
                 ui.add(egui::Slider::new(bg_dim, 0.0..=1.0).show_value(true));
+                ui.end_row();
             });
 
             ui.separator();
