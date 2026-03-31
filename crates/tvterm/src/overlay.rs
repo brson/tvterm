@@ -1,21 +1,34 @@
 use crate::theme::Theme;
 
-/// Render the settings overlay using egui.
+/// Render the overlay: a persistent toggle button in the top-right corner,
+/// and the full settings panel when open.
 pub fn render_overlay(
     ctx: &egui::Context,
     opacity: &mut f32,
     bg_dim: &mut f32,
     theme: &mut Theme,
-    visible: bool,
+    visible: &mut bool,
 ) {
-    if !visible {
+    // Always show a small toggle button anchored to the top-right.
+    egui::Area::new(egui::Id::new("overlay_toggle"))
+        .anchor(egui::Align2::RIGHT_TOP, egui::vec2(-8.0, 8.0))
+        .show(ctx, |ui| {
+            let label = if *visible { "x" } else { "\u{2699}" };
+            if ui.button(label).clicked() {
+                *visible = !*visible;
+            }
+        });
+
+    if !*visible {
         return;
     }
 
+    // Full settings panel, offset below the toggle button.
     egui::Window::new("Settings")
         .collapsible(false)
         .resizable(false)
-        .anchor(egui::Align2::RIGHT_TOP, egui::vec2(-16.0, 16.0))
+        .title_bar(false)
+        .anchor(egui::Align2::RIGHT_TOP, egui::vec2(-8.0, 40.0))
         .show(ctx, |ui| {
             egui::Grid::new("sliders").num_columns(2).show(ui, |ui| {
                 ui.label("Opacity");

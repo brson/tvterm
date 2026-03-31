@@ -309,13 +309,13 @@ impl RunningState {
                 palette,
             );
 
-            // Render overlay.
+            // Render overlay (toggle button is always visible).
             overlay::render_overlay(
                 ctx,
                 &mut self.opacity,
                 &mut self.bg_dim,
                 &mut self.theme,
-                self.overlay_visible,
+                &mut self.overlay_visible,
             );
         });
 
