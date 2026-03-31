@@ -4,7 +4,7 @@ use alacritty_terminal::vte::ansi::{NamedColor, Rgb};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Theme {
     Dracula,
-    GruvboxDark,
+    Kanagawa,
     TokyoNight,
     CatppuccinMocha,
 }
@@ -12,7 +12,7 @@ pub enum Theme {
 impl Theme {
     pub const ALL: &[Theme] = &[
         Theme::Dracula,
-        Theme::GruvboxDark,
+        Theme::Kanagawa,
         Theme::TokyoNight,
         Theme::CatppuccinMocha,
     ];
@@ -20,7 +20,7 @@ impl Theme {
     pub fn name(self) -> &'static str {
         match self {
             Theme::Dracula => "Dracula",
-            Theme::GruvboxDark => "Gruvbox Dark",
+            Theme::Kanagawa => "Kanagawa",
             Theme::TokyoNight => "Tokyo Night",
             Theme::CatppuccinMocha => "Catppuccin Mocha",
         }
@@ -29,7 +29,7 @@ impl Theme {
     pub fn palette(self) -> Palette {
         match self {
             Theme::Dracula => DRACULA,
-            Theme::GruvboxDark => GRUVBOX_DARK,
+            Theme::Kanagawa => KANAGAWA,
             Theme::TokyoNight => TOKYO_NIGHT,
             Theme::CatppuccinMocha => CATPPUCCIN_MOCHA,
         }
@@ -92,9 +92,10 @@ const fn rgb(r: u8, g: u8, b: u8) -> Rgb {
 }
 
 // https://draculatheme.com/contribute
+// Background reduced to 1/4 brightness for translucency.
 const DRACULA: Palette = Palette {
     foreground: rgb(248, 248, 242),
-    background: rgb(40, 42, 54),
+    background: rgb(10, 10, 13),
     cursor: rgb(248, 248, 242),
     black: rgb(33, 34, 44),
     red: rgb(255, 85, 85),
@@ -114,33 +115,35 @@ const DRACULA: Palette = Palette {
     bright_white: rgb(255, 255, 255),
 };
 
-// https://github.com/morhetz/gruvbox
-const GRUVBOX_DARK: Palette = Palette {
-    foreground: rgb(235, 219, 178),
-    background: rgb(40, 40, 40),
-    cursor: rgb(235, 219, 178),
-    black: rgb(40, 40, 40),
-    red: rgb(204, 36, 29),
-    green: rgb(152, 151, 26),
-    yellow: rgb(215, 153, 33),
-    blue: rgb(69, 133, 136),
-    magenta: rgb(177, 98, 134),
-    cyan: rgb(104, 157, 106),
-    white: rgb(168, 153, 132),
-    bright_black: rgb(146, 131, 116),
-    bright_red: rgb(251, 73, 52),
-    bright_green: rgb(184, 187, 38),
-    bright_yellow: rgb(250, 189, 47),
-    bright_blue: rgb(131, 165, 152),
-    bright_magenta: rgb(211, 134, 155),
-    bright_cyan: rgb(142, 192, 124),
-    bright_white: rgb(235, 219, 178),
+// https://github.com/rebelot/kanagawa.nvim
+// Background reduced to 1/4 brightness for translucency.
+const KANAGAWA: Palette = Palette {
+    foreground: rgb(220, 215, 186),
+    background: rgb(7, 7, 10),
+    cursor: rgb(200, 192, 147),
+    black: rgb(22, 22, 29),
+    red: rgb(195, 64, 67),
+    green: rgb(118, 148, 106),
+    yellow: rgb(192, 163, 110),
+    blue: rgb(126, 156, 216),
+    magenta: rgb(149, 127, 184),
+    cyan: rgb(106, 149, 137),
+    white: rgb(220, 215, 186),
+    bright_black: rgb(84, 84, 109),
+    bright_red: rgb(231, 115, 118),
+    bright_green: rgb(152, 187, 108),
+    bright_yellow: rgb(226, 195, 132),
+    bright_blue: rgb(126, 156, 216),
+    bright_magenta: rgb(210, 126, 153),
+    bright_cyan: rgb(127, 180, 202),
+    bright_white: rgb(220, 215, 186),
 };
 
 // https://github.com/enkia/tokyo-night-vscode-theme
+// Background reduced to 1/4 brightness for translucency.
 const TOKYO_NIGHT: Palette = Palette {
     foreground: rgb(192, 202, 245),
-    background: rgb(26, 27, 38),
+    background: rgb(6, 6, 9),
     cursor: rgb(192, 202, 245),
     black: rgb(21, 22, 30),
     red: rgb(247, 118, 142),
@@ -161,9 +164,10 @@ const TOKYO_NIGHT: Palette = Palette {
 };
 
 // https://github.com/catppuccin/catppuccin
+// Background reduced to 1/4 brightness for translucency.
 const CATPPUCCIN_MOCHA: Palette = Palette {
     foreground: rgb(205, 214, 244),
-    background: rgb(30, 30, 46),
+    background: rgb(7, 7, 11),
     cursor: rgb(245, 224, 220),
     black: rgb(69, 71, 90),
     red: rgb(243, 139, 168),
