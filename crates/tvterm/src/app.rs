@@ -169,7 +169,36 @@ impl ApplicationHandler<UserEvent> for App {
             return;
         };
 
-        // Let egui handle the event first.
+        // Intercept our shortcuts before egui sees them.
+        if let WindowEvent::KeyboardInput { ref event, .. } = event {
+            if event.state == ElementState::Pressed
+                && state.modifiers.contains(ModifiersState::CONTROL)
+                && state.modifiers.contains(ModifiersState::SHIFT)
+            {
+                if let Key::Character(c) = &event.logical_key {
+                    match c.as_str() {
+                        "O" | "o" => {
+                            state.overlay_visible = !state.overlay_visible;
+                            state.window.request_redraw();
+                            return;
+                        }
+                        "+" | "=" => {
+                            state.opacity = (state.opacity + 0.05).min(1.0);
+                            state.window.request_redraw();
+                            return;
+                        }
+                        "-" | "_" => {
+                            state.opacity = (state.opacity - 0.05).max(0.0);
+                            state.window.request_redraw();
+                            return;
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+
+        // Let egui handle the event.
         let egui_response = state.egui_state.on_window_event(&state.window, &event);
         if egui_response.repaint {
             state.window.request_redraw();
@@ -218,32 +247,6 @@ impl ApplicationHandler<UserEvent> for App {
             WindowEvent::KeyboardInput { event, .. } => {
                 if event.state != ElementState::Pressed {
                     return;
-                }
-
-                // Ctrl+Shift shortcuts.
-                if state.modifiers.contains(ModifiersState::CONTROL)
-                    && state.modifiers.contains(ModifiersState::SHIFT)
-                {
-                    if let Key::Character(c) = &event.logical_key {
-                        match c.as_str() {
-                            "O" | "o" => {
-                                state.overlay_visible = !state.overlay_visible;
-                                state.window.request_redraw();
-                                return;
-                            }
-                            "+" | "=" => {
-                                state.opacity = (state.opacity + 0.05).min(1.0);
-                                state.window.request_redraw();
-                                return;
-                            }
-                            "-" | "_" => {
-                                state.opacity = (state.opacity - 0.05).max(0.0);
-                                state.window.request_redraw();
-                                return;
-                            }
-                            _ => {}
-                        }
-                    }
                 }
 
                 // Don't send keys to PTY if egui consumed the event.
