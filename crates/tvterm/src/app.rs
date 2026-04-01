@@ -224,8 +224,8 @@ impl ApplicationHandler<UserEvent> for App {
                 state.render_frame();
             }
             WindowEvent::MouseWheel { delta, .. } => {
-                // Don't scroll terminal if egui wants the event.
-                if !egui_response.consumed {
+                // Ctrl+scroll is zoom (handled by egui). Only scroll terminal otherwise.
+                if !egui_response.consumed && !state.modifiers.contains(ModifiersState::CONTROL) {
                     let cell_h = state.cell_metrics.map_or(20.0, |m| m.height);
                     let lines = match delta {
                         MouseScrollDelta::LineDelta(_, y) => y as i32,
