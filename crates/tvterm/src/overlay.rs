@@ -13,8 +13,9 @@ pub fn render_overlay(
     egui::Area::new(egui::Id::new("overlay_toggle"))
         .anchor(egui::Align2::RIGHT_TOP, egui::vec2(-8.0, 8.0))
         .show(ctx, |ui| {
-            let label = if *visible { "x" } else { "\u{2699}" };
-            if ui.button(label).clicked() {
+            let btn = egui::Button::new("\u{2699}")
+                .selected(*visible);
+            if ui.add(btn).clicked() {
                 *visible = !*visible;
             }
         });
